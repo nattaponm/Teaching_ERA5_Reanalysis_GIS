@@ -1,201 +1,249 @@
 # Teaching ERA5 Reanalysis & GIS
 
-## การเรียนรู้ข้อมูล ERA5 Reanalysis ด้วย Python, Xarray, Cartopy และ Google Colab
+## คู่มือก่อนเรียน: จาก ERA5 Reanalysis → Python/Xarray → Weather Maps → Climatology → Anomaly → Case Study
 
-Repository นี้จัดทำขึ้นเพื่อใช้ในการเรียนการสอนการวิเคราะห์ข้อมูลบรรยากาศจาก **ERA5 reanalysis** ร่วมกับแนวคิดทางอุตุนิยมวิทยา ภูมิศาสตร์กายภาพ และภูมิสารสนเทศ โดยเน้นให้นิสิตเรียนรู้ตั้งแต่โครงสร้างข้อมูล NetCDF ไปจนถึงการอ่านแผนที่อากาศ การวิเคราะห์บรรยากาศหลายระดับความกดอากาศ การวิเคราะห์ space–time ด้วย Hovmöller diagram การสร้าง climatology และ anomaly และการสังเคราะห์เป็นกรณีศึกษาแบบ mini research project
+Repository นี้เป็นชุดการเรียนการสอนสำหรับนิสิตด้าน **วิทยาศาสตร์สิ่งแวดล้อม ภูมิศาสตร์ ภูมิสารสนเทศ และอุตุนิยมวิทยาประยุกต์** โดยใช้ข้อมูล **ERA5 reanalysis** และ Python บน Google Colab
 
-> เป้าหมายของรายวิชาไม่ใช่เพียง “รันโค้ดให้ได้” แต่ให้นิสิตสามารถเชื่อมโยง  
-> **ข้อมูล → วิธีวิเคราะห์ → แผนที่ → หลักการทางฟิสิกส์ → การตีความ → ข้อจำกัด**
+เป้าหมายไม่ใช่เพียงให้ “รันโค้ดได้” แต่ให้นิสิตเข้าใจว่า
 
-Repository: [https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS](https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS)
+```text
+ข้อมูลคืออะไร
+→ ตัวแปรมีความหมายทางกายภาพอย่างไร
+→ สมการคำนวณอะไร
+→ code ทำขั้นตอนใด
+→ figure แสดงอะไร
+→ ตีความได้แค่ไหน
+→ มีข้อจำกัดอะไร
+```
+
+> **แนวคิดหลักของรายวิชา: Data → Calculation → Map → Physical interpretation → Limitation**
 
 ---
 
-## 1. เหมาะสำหรับใคร
+# 1. เริ่มจากลิงก์สำคัญ
 
-เนื้อหาออกแบบสำหรับนิสิตระดับปริญญาตรีชั้นปีที่ 3–4 ในสาขา เช่น
+## 1.1 Repository และ Google Colab
 
-- วิทยาศาสตร์สิ่งแวดล้อม
-- ภูมิศาสตร์
-- ภูมิสารสนเทศ
-- อุตุนิยมวิทยาประยุกต์
-- ทรัพยากรธรรมชาติและสิ่งแวดล้อม
+- GitHub repository: [Teaching_ERA5_Reanalysis_GIS](https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS)
+- Google Colab: [https://colab.research.google.com/](https://colab.research.google.com/)
 
-รวมถึงสามารถใช้เป็นพื้นฐานสำหรับนิสิตระดับบัณฑิตศึกษาที่ต้องการเริ่มต้นวิเคราะห์ atmospheric reanalysis ด้วย Python
+## 1.2 แหล่งข้อมูล ERA5
 
-ความรู้พื้นฐานที่ช่วยให้เรียนได้ง่ายขึ้น ได้แก่ Python เบื้องต้น, latitude/longitude, weather map และความเข้าใจพื้นฐานเรื่องชั้นบรรยากาศ แต่ Notebook ได้ออกแบบให้ทบทวนแนวคิดที่จำเป็นระหว่างบทเรียน
-
----
-
-## 2. ERA5 คืออะไร
-
-**ERA5** คือ atmospheric reanalysis รุ่นที่ 5 ของ European Centre for Medium-Range Weather Forecasts (ECMWF)
-
-Reanalysis เป็นข้อมูลที่เกิดจากการผสาน
-
-```text
-Atmospheric observations
-        +
-Numerical weather prediction model
-        +
-Data assimilation
-        ↓
-Spatially and temporally consistent atmospheric dataset
-```
-
-ดังนั้นต้องจำว่า
-
-```text
-Reanalysis ≠ direct observation
-Reanalysis ≠ weather forecast
-```
-
-Reanalysis มีประโยชน์มากในการศึกษาสภาพบรรยากาศย้อนหลัง เพราะให้ตัวแปรหลายชนิดบน grid ที่ต่อเนื่องทั้งในอวกาศและเวลา
-
-เอกสารอ้างอิงหลัก:
+ข้อมูลที่ใช้ในรายวิชามาจาก **ERA5 reanalysis** ของ ECMWF / Copernicus Climate Change Service และถูกเตรียมเป็นไฟล์ขนาดเล็กสำหรับการเรียน
 
 - [ECMWF ERA5 Documentation](https://confluence.ecmwf.int/display/CKB/ERA5%3A+data+documentation)
-- [Hersbach et al. (2020), The ERA5 global reanalysis](https://doi.org/10.1002/qj.3803)
+- [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/)
+- [ERA5 overview — ECMWF](https://www.ecmwf.int/en/forecasts/dataset/ecmwf-reanalysis-v5)
+
+บทความอ้างอิงหลัก:
+
+Hersbach, H., Bell, B., Berrisford, P., et al. (2020). The ERA5 global reanalysis. *Quarterly Journal of the Royal Meteorological Society, 146*(730), 1999–2049. https://doi.org/10.1002/qj.3803
+
+## 1.3 Library ที่ใช้
+
+| Library / Platform | หน้าที่ในรายวิชา | Documentation |
+|---|---|---|
+| **Google Colab** | รัน Jupyter Notebook บน cloud | [Colab](https://colab.research.google.com/) |
+| **Python** | ภาษาหลักในการวิเคราะห์ | [Python](https://docs.python.org/3/) |
+| **Xarray** | เปิดและวิเคราะห์ NetCDF / multidimensional atmospheric data | [Xarray](https://docs.xarray.dev/) |
+| **netCDF4** | backend สำหรับอ่าน/เขียน NetCDF | [netCDF4-python](https://unidata.github.io/netcdf4-python/) |
+| **h5netcdf** | NetCDF/HDF5 backend | [h5netcdf](https://h5netcdf.org/) |
+| **Dask** | ช่วยจัดการ array ขนาดใหญ่แบบ lazy/chunked | [Dask](https://docs.dask.org/) |
+| **NumPy** | คำนวณ array และสมการเชิงตัวเลข | [NumPy](https://numpy.org/doc/) |
+| **Pandas** | ตาราง, วันที่/เวลา, CSV | [Pandas](https://pandas.pydata.org/docs/) |
+| **Matplotlib** | plot graph และ scientific figure | [Matplotlib](https://matplotlib.org/stable/) |
+| **Cartopy** | แผนที่, projection, coastline, coordinate transform | [Cartopy](https://cartopy.readthedocs.io/) |
 
 ---
 
-## 3. แนวคิดสำคัญของหลักสูตร
+# 2. ERA5 และ Reanalysis คืออะไร
 
-ข้อมูลบรรยากาศสามารถมองเป็น atmospheric data cube
+ERA5 ไม่ใช่สถานีตรวจอากาศโดยตรง และไม่ใช่ weather forecast
 
-$$
-X = X(t,p,\phi,\lambda)
-$$
-
-โดย
-
-- $t$ = time
-- $p$ = pressure level
-- $\phi$ = latitude
-- $\lambda$ = longitude
-
-เส้นทางการเรียนใน repository นี้คือ
+แนวคิดแบบง่าย:
 
 ```text
-Where are the data?
-        ↓
-How are the data structured?
-        ↓
-Where are they on Earth?
-        ↓
-How does the atmosphere vary vertically?
-        ↓
-How does the wind behave?
-        ↓
-How do we build synoptic weather maps?
-        ↓
-How does the pattern evolve in space and time?
-        ↓
-What is the normal climatological state?
-        ↓
-How different is a target period from that baseline?
-        ↓
-How do we integrate all evidence into a case study?
+ข้อมูลตรวจวัดจริง
+      +
+แบบจำลองบรรยากาศ
+      +
+Data assimilation
+      ↓
+Reanalysis
 ```
+
+ดังนั้น
+
+```text
+Reanalysis ≠ Observation
+Reanalysis ≠ Forecast
+```
+
+ข้อดีของ reanalysis คือได้ข้อมูลบรรยากาศที่มี spatial grid และ time step สม่ำเสมอ เหมาะกับการวิเคราะห์ย้อนหลัง
 
 ---
 
-## 4. ข้อมูลสำหรับการเรียน
+# 3. Atmospheric Data Cube
 
-ข้อมูลขนาดใหญ่ถูกเตรียมให้อยู่ในรูป compact teaching datasets เพื่อให้สามารถใช้งานบน Google Colab และดาวน์โหลดจาก GitHub ได้สะดวก
+ข้อมูลบรรยากาศใน ERA5 สามารถคิดเป็น “กล่องข้อมูลหลายมิติ”
 
-Folder:
+```math
+X = X(t,p,\phi,\lambda)
+```
+
+อ่านว่า:
+
+```text
+ตัวแปร X ขึ้นกับ
+t = เวลา
+p = ระดับความกดอากาศ
+φ = ละติจูด
+λ = ลองจิจูด
+```
+
+ตัวอย่าง:
+
+```text
+Temperature
+→ เลือกวันที่
+→ เลือก 850 hPa
+→ เหลือแผนที่ latitude × longitude
+```
+
+นี่คือเหตุผลที่ Xarray เหมาะกับข้อมูล ERA5 เพราะเราสามารถเลือกข้อมูลตาม “ชื่อ coordinate” ได้โดยตรง
+
+---
+
+# 4. Teaching Datasets ที่ใช้
+
+ไฟล์ต้นฉบับ ERA5 มีขนาดใหญ่ จึงเตรียมเป็น compact datasets เพื่อให้นิสิตใช้งานบน Colab ได้เร็วขึ้น
+
+Folder บน GitHub:
 
 ```text
 00_prepared_data/
 ```
 
-ประกอบด้วยข้อมูลหลัก 3 ชุด
-
-### 4.1 EVENT — Pressure-Level Dataset
+## 4.1 EVENT: Pressure-Level Data
 
 ```text
 era5_noul_20111002_05_SEAsia_pressure_levels_0.5deg.nc
 ```
 
-ลักษณะสำคัญ:
+ครอบคลุม:
 
-- 2–5 October 2011
-- มี 4 time steps
-- ทุก time step คือ **00 UTC synoptic snapshot**
-- ไม่ใช่ daily mean
-- pressure levels: 1000, 925, 850, 700, 500, 300, 250 และ 200 hPa
-- variables หลัก: `t`, `r`, `q`, `z`, `u`, `v`, `vo`, `d`
-- horizontal grid spacing ประมาณ 0.5°
+```text
+2–5 October 2011
+00 UTC ของแต่ละวัน
+```
 
-ใช้หลักใน Notebook 01–05 และ 09
+มี 4 time steps เท่านั้น
 
-### 4.2 SPATIOTEMPORAL — 850-hPa Zonal Wind
+> **สำคัญ: เป็น 00-UTC synoptic snapshots ไม่ใช่ daily mean**
+
+Pressure levels:
+
+```text
+1000, 925, 850, 700, 500, 300, 250, 200 hPa
+```
+
+Variables:
+
+| ชื่อ | ความหมาย |
+|---|---|
+| `t` | Temperature |
+| `r` | Relative humidity |
+| `q` | Specific humidity |
+| `z` | Geopotential |
+| `u` | Zonal wind component |
+| `v` | Meridional wind component |
+| `vo` | Relative vorticity |
+| `d` | Horizontal divergence |
+
+ใช้ใน Notebook 01–05 และ 09
+
+---
+
+## 4.2 SPATIOTEMPORAL: 850-hPa Zonal Wind
 
 ```text
 era5_u850_6hourly_20110901_20111031_Asia_0.5deg.nc
 ```
 
-ลักษณะสำคัญ:
-
-- 1 September–31 October 2011
-- temporal interval = 6 ชั่วโมง
-- เวลา 00, 06, 12 และ 18 UTC
-- variable = `u`
-- pressure level = 850 hPa ตาม source/preparation metadata
-
-ข้อควรจำ:
+ช่วงเวลา:
 
 ```text
-u ≠ wind speed
+1 September–31 October 2011
+00, 06, 12, 18 UTC
 ```
 
-`u` คือ zonal component ของลมเท่านั้น
+ดังนั้น time interval คือ
 
-ใช้หลักใน Notebook 06 และ 09
+```text
+6 ชั่วโมง
+```
 
-### 4.3 MONTHLY BASELINE — January/July Monthly Means
+มี variable เดียว:
+
+```text
+u = zonal wind component
+```
+
+การอ่านเครื่องหมาย:
+
+```text
+u > 0 → ลมองค์ประกอบไปทางตะวันออก
+u < 0 → ลมองค์ประกอบไปทางตะวันตก
+```
+
+> `u` ไม่ใช่ wind speed
+
+ใช้ใน Notebook 06 และ 09
+
+---
+
+## 4.3 MONTHLY BASELINE: January/July 1981–2020
 
 ```text
 era5_850hPa_JanJul_monthlymeans_1981_2020_Asia_0.5deg.nc
 ```
 
-ลักษณะสำคัญ:
-
-- 1981–2020
-- มีเฉพาะ January และ July
-- ข้อมูลแต่ละ time step เป็น monthly mean
-- variables: `z`, `r`, `t`, `u`, `v`, `vo`
-- pressure level = 850 hPa ตาม source/preparation metadata
-
-ข้อควรจำ:
-
-> ไฟล์นี้เป็น **monthly-mean archive** ไม่ใช่ precomputed climatology
-
-Climatology จะถูกคำนวณใน Notebook 07 โดยเฉลี่ยเดือนเดียวกันข้ามหลายปี
-
-และเนื่องจากไม่มี October:
+ประกอบด้วย:
 
 ```text
-No October climatology
-→ No October 2011 climatological anomaly
+January 1981–2020
+July 1981–2020
 ```
+
+แต่ละ time step เป็น **monthly mean**
+
+ไฟล์นี้ยังไม่ใช่ climatology โดยตัวมันเอง
+
+```text
+monthly mean archive
+        ↓ average same month across years
+climatology
+```
+
+> ไม่มี October ใน dataset นี้ จึงไม่มี October climatology สำหรับคำนวณ October 2011 anomaly
+
+ใช้ใน Notebook 07–08
 
 ---
 
-## 5. วิธีเริ่มเรียน
+# 5. ลำดับการเรียน
 
-สำหรับนิสิต ให้เริ่มจาก Notebook 00 แล้วเรียนต่อเรียงตามลำดับ
+นิสิตควรเรียนตามลำดับ
 
 ```text
 00 → 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09
 ```
 
-Notebook `00A` เป็น **Instructor / Data Preparation Notebook** ใช้สำหรับเตรียม compact teaching datasets จาก ERA5 source files ขนาดใหญ่ จึงไม่จำเป็นสำหรับการเรียนปกติของนิสิต
+`00A` เป็น Notebook สำหรับผู้สอน ใช้เตรียม teaching datasets จาก ERA5 source files
 
-### เปิดใน Google Colab
+## Open directly in Google Colab
 
-| Notebook | หัวข้อ | Colab |
+| Notebook | เนื้อหา | Open in Colab |
 |---|---|---|
 | 00A | Prepare ERA5 Teaching Datasets — Instructor | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/00A_Prepare_ERA5_Teaching_Datasets.ipynb) |
 | 00 | Download, Setup & Data Audit | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/00_Get_ERA5_Teaching_Data_and_Audit.ipynb) |
@@ -211,122 +259,202 @@ Notebook `00A` เป็น **Instructor / Data Preparation Notebook** ใช้
 
 ---
 
-# 6. รายละเอียดแต่ละ Notebook
+# 6. วิธีอ่านสมการใน README นี้
 
-## Notebook 00 — Download, Setup & Data Audit
+เพื่อให้ GitHub แสดงผลได้สม่ำเสมอ README นี้ใช้ **GitHub math block**
+
+ตัวอย่าง:
+
+```math
+V = \sqrt{u^2+v^2}
+```
+
+และจะมีคำอธิบายแบบข้อความกำกับเสมอ:
+
+```text
+Wind speed = square root of (u² + v²)
+```
+
+ดังนั้น แม้พื้นฐานคณิตศาสตร์ยังไม่มาก ให้เริ่มจาก “อ่านข้อความ” ก่อน แล้วค่อยดูสมการ
+
+---
+
+# 7. Notebook 00 — Download, Setup & Data Audit
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/00_Get_ERA5_Teaching_Data_and_Audit.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-Notebook แรกใช้เตรียม working environment บน Google Colab และ Google Drive ดาวน์โหลด teaching datasets จาก GitHub และตรวจว่าข้อมูลพร้อมสำหรับบทเรียนถัดไป
+เตรียม Colab, mount Google Drive, ดาวน์โหลดข้อมูลจาก GitHub และตรวจว่าไฟล์พร้อมสำหรับการเรียน
 
-นิสิตจะเรียนรู้ว่า ก่อนวิเคราะห์ข้อมูลควรถามก่อนว่า
+## แนวคิด
+
+ก่อนวิเคราะห์ต้องตอบให้ได้ว่า:
 
 ```text
-ข้อมูลมาจากไหน?
-มีไฟล์อะไร?
+ไฟล์อยู่ที่ไหน?
+ชื่อไฟล์อะไร?
+ขนาดเท่าใด?
 มี dimensions อะไร?
-มีตัวแปรอะไร?
-ช่วงเวลาใด?
-พื้นที่ครอบคลุมเท่าใด?
-หน่วยคืออะไร?
+มี coordinates อะไร?
+มี variables อะไร?
+ช่วงเวลาอะไร?
 ```
 
-### แนวคิดสำคัญ
+## Code ทำอะไร
 
-- reproducible data workflow
-- file organization
-- NetCDF metadata
-- provenance
-- coordinate range
-- temporal coverage
-- pressure-level availability
-- data audit ก่อนวิเคราะห์
+### 1. Mount Google Drive
 
-โครงสร้าง working directory:
-
-```text
-MyDrive/
-└── Teaching_ERA5_Reanalysis_GIS/
-    ├── 00_source_github/
-    ├── 01_data/
-    ├── 02_metadata/
-    ├── 03_output/
-    ├── 04_figures/
-    └── 99_logs/
+```python
+from google.colab import drive
+drive.mount("/content/drive")
 ```
 
-### สิ่งที่ต้องจำ
+ความหมาย:
 
 ```text
-File downloaded successfully
+เชื่อม Colab กับ Google Drive
+เพื่อบันทึกไฟล์และรูปไม่ให้หายเมื่อ runtime ปิด
+```
+
+### 2. สร้าง folder
+
+```python
+Path(...).mkdir(parents=True, exist_ok=True)
+```
+
+ใช้จัด workspace ให้ reproducible
+
+### 3. ดาวน์โหลดไฟล์
+
+ใช้ URL ของ GitHub `raw` แล้วบันทึกลง `00_source_github`
+
+### 4. เปิด NetCDF
+
+```python
+ds = xr.open_dataset(file)
+```
+
+### 5. Audit
+
+ตรวจ:
+
+```python
+ds.dims
+ds.coords
+ds.data_vars
+ds.attrs
+```
+
+## สิ่งที่ต้องเข้าใจ
+
+```text
+ดาวน์โหลดสำเร็จ
 ≠
-Scientific data verified
+ข้อมูลถูกต้องทางวิทยาศาสตร์
 ```
+
+ต้อง audit metadata ทุกครั้ง
 
 ---
 
-## Notebook 01 — NetCDF & Xarray Fundamentals
+# 8. Notebook 01 — NetCDF & Xarray Fundamentals
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/01_NetCDF_Xarray_Fundamentals.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-ทำความเข้าใจโครงสร้าง NetCDF และวิธีใช้ Xarray เพื่อเลือกข้อมูลจาก atmospheric data cube
+เข้าใจ `Dataset`, `DataArray`, dimension, coordinate และการเลือกข้อมูลด้วย Xarray
 
-### แนวคิดสำคัญ
+## สมการพื้นฐาน
 
-```text
-Dataset
-DataArray
-Dimensions
-Coordinates
-Variables
-Attributes
+Atmospheric cube:
+
+```math
+T=T(t,p,\phi,\lambda)
 ```
 
-แนวคิด atmospheric cube:
-
-$$
-T=T(t,p,\phi,\lambda)
-$$
-
-การแปลง Kelvin เป็น Celsius:
-
-$$
-T_{^\circ C}=T_K-273.15
-$$
-
-### สิ่งที่นิสิตจะทำ
-
-- เปิด NetCDF ด้วย `xarray`
-- ตรวจ dimensions/coordinates/variables
-- ใช้ `.isel()` และ `.sel()`
-- เลือกเวลาและ pressure level
-- เลือก grid point ใกล้ตำแหน่งจริง
-- สร้างแผนที่ 850-hPa temperature
-- เปรียบเทียบ 2–5 October 2011
-
-### ข้อควรจำ
+อ่านแบบง่าย:
 
 ```text
-.isel(level=5)
-≠
-เลือก 500 hPa โดยอัตโนมัติ
+Temperature เปลี่ยนตาม
+เวลา + pressure level + latitude + longitude
+```
+
+### Kelvin → Celsius
+
+```math
+T_{^\circ C}=T_K-273.15
+```
+
+ตัวอย่าง:
+
+```text
+T = 300 K
+T = 300 − 273.15
+T = 26.85 °C
+```
+
+## Code สำคัญ
+
+### เปิดไฟล์
+
+```python
+ds = xr.open_dataset(EVENT_FILE)
+```
+
+### เลือกด้วยตำแหน่ง index
+
+```python
+ds["t"].isel(time=0)
+```
+
+`isel` = index selection
+
+### เลือกด้วยค่าจริงของ coordinate
+
+```python
+ds["t"].sel(
+    time="2011-10-02",
+    level=850,
+)
+```
+
+`sel` = label/coordinate selection
+
+ควรใช้ `sel(level=850)` เมื่อเราต้องการความหมายทางกายภาพ 850 hPa
+
+### เลือก grid point ใกล้ตำแหน่ง
+
+```python
+.sel(
+    latitude=13.75,
+    longitude=100.50,
+    method="nearest",
+)
+```
+
+หมายถึงเลือก **grid center ที่ใกล้ที่สุด**
+
+ไม่ใช่ค่าจากสถานีกรุงเทพโดยตรง
+
+## สิ่งที่ต้องจำ
+
+```text
+nearest grid ≠ station observation
 ```
 
 ---
 
-## Notebook 02 — Spatial Subsetting, Cartopy & Map Projections
+# 9. Notebook 02 — Spatial Subsetting, Cartopy & Map Projections
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/02_Spatial_Subsetting_Cartopy_and_Map_Projections.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เชื่อม atmospheric grid เข้ากับแนวคิด GIS และ cartographic visualization
+เข้าใจความสัมพันธ์ระหว่าง atmospheric grid, latitude/longitude และ map projection
 
-### แนวคิดสำคัญ
+## แนวคิดสำคัญ
 
 ```text
 Data CRS
@@ -334,450 +462,757 @@ Data CRS
 Map projection
 ```
 
-และ
+ข้อมูล ERA5 อยู่บน latitude/longitude grid
+
+Cartopy สามารถนำข้อมูลเดียวกันไปแสดงด้วยหลาย projection เช่น:
+
+```text
+PlateCarree
+Mercator
+LambertConformal
+```
+
+## Code สำคัญ
+
+### Spatial subset
+
+```python
+subset = field.sel(
+    latitude=slice(...),
+    longitude=slice(...),
+)
+```
+
+หมายถึง “ตัดข้อมูลจริงให้เหลือพื้นที่ที่สนใจ”
+
+### Map extent
+
+```python
+ax.set_extent(
+    [90, 115, 0, 30],
+    crs=ccrs.PlateCarree(),
+)
+```
+
+หมายถึง “เปลี่ยนบริเวณที่แสดงบนแผนที่”
+
+ไม่ได้ลดขนาด DataArray
+
+### Data transform
+
+```python
+transform=ccrs.PlateCarree()
+```
+
+บอก Cartopy ว่า coordinate ต้นทางของข้อมูลคือ longitude/latitude
+
+## แยกคำศัพท์
 
 ```text
 Subsetting
-≠
+= ตัดพื้นที่ข้อมูล
+
 Subsampling
-≠
+= เลือกบาง grid point
+
 Coarsening
-≠
+= รวมหลาย grid cells เป็น cell ที่หยาบขึ้น
+
 Regridding
+= คำนวณข้อมูลไปยัง grid ใหม่
 ```
 
-นิสิตจะเรียนรู้:
-
-- latitude/longitude coordinate ordering
-- spatial subset
-- map extent
-- Plate Carrée
-- Mercator
-- Lambert Conformal
-- `transform=` ใน Cartopy
-- grid-center visualization
-
-### หลักการสำคัญ
-
-การเปลี่ยน projection เปลี่ยนวิธีที่ข้อมูลถูก **แสดงบนแผนที่** ไม่ได้เปลี่ยน atmospheric values ของข้อมูลต้นฉบับ
-
-### ข้อควรจำ
-
-```text
-Grid spacing
-≠
-effective physical resolution
-```
-
-และ
-
-```text
-set_extent()
-≠
-subsetting the DataArray
-```
+> Grid spacing ไม่เท่ากับ effective physical resolution
 
 ---
 
-## Notebook 03 — Pressure-Level Atmospheric Structure
+# 10. Notebook 03 — Pressure-Level Atmospheric Structure
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/03_Pressure_Level_Atmospheric_Structure.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เรียนรู้ vertical structure ของ atmosphere ผ่าน pressure levels
+เข้าใจบรรยากาศในแนวดิ่งจาก pressure levels
+
+## Pressure levels
 
 ```text
-1000
-925
-850
-700
-500
-300
-250
-200 hPa
+1000 / 925 hPa → lower troposphere
+850 hPa        → lower troposphere
+700 hPa        → lower-middle
+500 hPa        → middle troposphere
+300–200 hPa    → upper troposphere
 ```
 
-### Hydrostatic relationship
+ความสูงจริงของ pressure surface เปลี่ยนตามสภาพบรรยากาศ จึงไม่ใช่ geometric height คงที่
 
-$$
-\frac{\partial p}{\partial z}
-=
--\rho g
-$$
+## Hydrostatic balance
 
-### Geopotential height
+```math
+\frac{\partial p}{\partial z}=-\rho g
+```
 
-ERA5 `z` เป็น geopotential $\Phi$ หน่วย $\mathrm{m^2\,s^{-2}}$
+อ่านแบบง่าย:
 
-ดังนั้น
+```text
+เมื่อสูงขึ้น ความกดอากาศลดลง
+เพราะน้ำหนักของอากาศที่อยู่ด้านบนลดลง
+```
 
-$$
-Z
-=
-\frac{\Phi}{g_0}
-$$
+สัญลักษณ์:
+
+| Symbol | ความหมาย |
+|---|---|
+| `p` | pressure |
+| `z` | height |
+| `ρ` | air density |
+| `g` | gravitational acceleration |
+
+## Geopotential → Geopotential Height
+
+ERA5 variable `z` เป็น geopotential ไม่ใช่ metre
+
+```math
+Z=\frac{\Phi}{g_0}
+```
 
 โดย
 
-$$
+```math
 g_0=9.80665\ \mathrm{m\,s^{-2}}
-$$
+```
 
-### สิ่งที่นิสิตจะวิเคราะห์
+ตัวอย่าง:
 
-- temperature หลาย pressure levels
-- relative humidity
-- specific humidity
-- geopotential height
-- vertical profile ที่ตำแหน่งหนึ่ง
-- lower / middle / upper troposphere
+```text
+ถ้า geopotential = 14,700 m² s⁻²
 
-### ข้อควรจำ
+Z = 14,700 / 9.80665
+≈ 1,499 m
+```
 
-Pressure level ไม่ใช่ geometric height คงที่ทุกพื้นที่ และ 850 hPa อาจอยู่ต่ำกว่าพื้นดินเหนือภูเขาสูง
+## Code สำคัญ
+
+```python
+height = ds["z"] / 9.80665
+```
+
+### เลือกหลายระดับ
+
+```python
+for level in [1000, 850, 700, 500, 300, 200]:
+    field = ds["t"].sel(level=level)
+```
+
+## สิ่งที่ต้องจำ
+
+> 850 hPa อาจอยู่ต่ำกว่าพื้นดินเหนือพื้นที่ภูเขาสูง จึงต้องตีความอย่างระมัดระวัง
 
 ---
 
-## Notebook 04 — Wind & Vector Analysis
+# 11. Notebook 04 — Wind & Vector Analysis
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/04_Wind_and_Vector_Analysis.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เข้าใจ wind components และการแสดงลมเป็น vector
+เข้าใจองค์ประกอบของลมและการสร้าง vector map
 
-### Wind components
-
-```text
-u > 0 → eastward component
-u < 0 → westward component
-
-v > 0 → northward component
-v < 0 → southward component
-```
-
-### Wind speed
-
-$$
-V
-=
-\sqrt{u^2+v^2}
-$$
-
-### สิ่งที่นิสิตจะทำ
-
-- คำนวณ wind speed
-- แสดง `u`, `v`
-- สร้าง wind vectors ด้วย `quiver`
-- เปรียบเทียบ 850, 500 และ 200 hPa
-- ดู vertical change ของ atmospheric flow
-
-### ข้อควรจำ
+## Wind components
 
 ```text
-u ≠ wind speed
-v ≠ wind speed
+u = east–west component
+v = north–south component
 ```
 
-vector density บนแผนที่เป็น visual sampling choice ไม่ใช่ observational resolution
+เครื่องหมาย:
+
+```text
+u > 0 → eastward
+u < 0 → westward
+
+v > 0 → northward
+v < 0 → southward
+```
+
+## Wind speed
+
+```math
+V=\sqrt{u^2+v^2}
+```
+
+อ่านแบบง่าย:
+
+```text
+Wind speed
+= √(u² + v²)
+```
+
+ตัวอย่าง:
+
+```text
+u = 3 m/s
+v = 4 m/s
+
+V = √(3² + 4²)
+  = √25
+  = 5 m/s
+```
+
+## Code
+
+```python
+speed = np.hypot(u, v)
+```
+
+เทียบเท่ากับ
+
+```python
+speed = np.sqrt(u**2 + v**2)
+```
+
+### วาด vector
+
+```python
+ax.quiver(
+    lon,
+    lat,
+    u,
+    v,
+)
+```
+
+`quiver` ใช้ทิศและขนาดจาก `u` และ `v`
+
+## Vector skip
+
+```python
+u.values[::4, ::4]
+```
+
+แปลว่าแสดงลูกศรทุก 4 grid cells เพื่อไม่ให้รูปแน่นเกินไป
+
+> นี่เป็น visualization choice ไม่ใช่การเปลี่ยน resolution ของ ERA5
 
 ---
 
-## Notebook 05 — Synoptic Weather Maps & Atmospheric Dynamics
+# 12. Notebook 05 — Synoptic Weather Maps & Atmospheric Dynamics
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/05_Synoptic_Weather_Maps_and_Atmospheric_Dynamics.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เริ่มสร้าง weather maps แบบบูรณาการหลายตัวแปร
+รวมหลาย atmospheric fields เพื่ออ่าน synoptic weather map
 
-### Pressure Gradient Force
+## 12.1 Pressure Gradient Force
 
-$$
+```math
 \vec{F}_{PGF}
 =
 -\frac{1}{\rho}\nabla p
-$$
+```
 
-### Coriolis parameter
+อ่านแบบง่าย:
 
-$$
-f
-=
-2\Omega\sin\phi
-$$
+```text
+อากาศมีแนวโน้มถูกเร่งจากบริเวณ pressure สูง
+ไปยัง pressure ต่ำ
+```
 
-### Relative vorticity
+## 12.2 Coriolis parameter
 
-$$
+```math
+f=2\Omega\sin\phi
+```
+
+หมายถึงผลของการหมุนโลกขึ้นกับ latitude
+
+## 12.3 Relative Vorticity
+
+```math
 \zeta
 =
 \frac{\partial v}{\partial x}
 -
 \frac{\partial u}{\partial y}
-$$
-
-Northern Hemisphere:
-
-```text
-ζ > 0
-→ cyclonic relative rotation
 ```
 
-### Horizontal divergence
+อ่านแบบง่าย:
 
-$$
-\nabla_h\cdot\vec{V}
+```text
+ζ ใช้อธิบาย local rotation ของ horizontal flow
+```
+
+ใน Northern Hemisphere:
+
+```text
+ζ > 0 → cyclonic relative rotation
+ζ < 0 → anticyclonic relative rotation
+```
+
+> Positive vorticity ไม่ได้แปลว่าอากาศลอยตัวขึ้นโดยตรง
+
+## 12.4 Horizontal Divergence
+
+```math
+D
 =
 \frac{\partial u}{\partial x}
 +
 \frac{\partial v}{\partial y}
-$$
-
-### Synoptic framework
-
-```text
-850 hPa
-→ temperature + RH + height + wind
-
-500 hPa
-→ geopotential height + relative vorticity + wind
-
-200 hPa
-→ divergence + wind
 ```
 
-### ข้อควรจำ
+อ่านแบบง่าย:
 
 ```text
-positive vorticity
-≠ rising motion directly
-
-upper-level divergence
-≠ proof of severe convection
+D > 0 → horizontal flow แผ่ออกจากกัน
+D < 0 → horizontal flow มารวมกัน
 ```
+
+> 200-hPa divergence ไม่ใช่ vertical velocity
+
+## Code สำคัญ
+
+### แปลง vorticity เพื่ออ่าน colorbar ง่าย
+
+```python
+vort_scaled = vort_500 * 1.0e5
+```
+
+ถ้าค่าจริงเป็น
+
+```text
+0.00002 s⁻¹
+```
+
+เมื่อคูณ `10⁵` จะได้
+
+```text
+2
+```
+
+ดังนั้น colorbar ใช้หน่วย
+
+```text
+10⁻⁵ s⁻¹
+```
+
+### Overlay หลาย field
+
+```python
+pcolormesh(...)   # shading
+contour(...)      # geopotential height
+quiver(...)       # wind
+```
+
+นี่คือพื้นฐานของ integrated synoptic map
 
 ---
 
-## Notebook 06 — Hovmöller & Spatiotemporal Analysis
+# 13. Notebook 06 — Hovmöller & Spatiotemporal Analysis
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/06_Hovmoller_and_Spatiotemporal_Analysis.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เปลี่ยนจากการดูแผนที่ ณ เวลาเดียว ไปสู่การวิเคราะห์ **space × time**
+เรียนรู้การเปลี่ยนจากแผนที่ `space × space` ไปสู่ `space × time`
 
-### Map
-
-```text
-latitude × longitude
-at one time
-```
-
-### Time series
+## เปรียบเทียบ
 
 ```text
-time
-at one location or region
+Map
+= latitude × longitude ที่เวลาเดียว
+
+Time series
+= time ที่ตำแหน่ง/พื้นที่เดียว
+
+Hovmöller
+= space × time
 ```
 
-### Hovmöller
+## Latitude-weighted Time–Longitude Hovmöller
 
-```text
-space × time
-```
-
-### Time–Longitude Hovmöller
-
-$$
+```math
 \overline{u}(\lambda,t)
 =
 \frac{
-\sum_\phi u(\lambda,\phi,t)w(\phi)
+\sum_{\phi}u(\lambda,\phi,t)w(\phi)
 }{
-\sum_\phi w(\phi)
+\sum_{\phi}w(\phi)
 }
-$$
+```
 
 โดย
 
-$$
+```math
 w(\phi)=\cos\phi
-$$
-
-### Apparent propagation speed
-
-$$
-c
-\approx
-\frac{\Delta x}{\Delta t}
-$$
-
-และโดยประมาณ
-
-$$
-\Delta x
-\approx
-111.32\cos\phi\Delta\lambda
-$$
-
-### ข้อควรจำ
-
-```text
-diagonal Hovmöller feature
-≠ proof of atmospheric wave
 ```
 
-ควรย้อนกลับไปตรวจ maps ทุกครั้ง
+อ่านแบบง่าย:
+
+```text
+1. เลือก latitude band
+2. ให้แต่ละ latitude มีน้ำหนัก cos(latitude)
+3. average latitude ออกไป
+4. เหลือ longitude × time
+```
+
+## ทำไมต้อง cos(latitude)?
+
+บน latitude–longitude grid พื้นที่ของ grid cell ลดลงเมื่อ latitude สูงขึ้น
+
+โดยประมาณ:
+
+```math
+A\propto\cos\phi
+```
+
+## Apparent propagation speed
+
+```math
+c\approx\frac{\Delta x}{\Delta t}
+```
+
+อ่านง่าย:
+
+```text
+speed = distance / time
+```
+
+ระยะตาม longitude โดยประมาณ:
+
+```math
+\Delta x
+\approx
+111.32\cos\phi\,\Delta\lambda
+```
+
+ตัวอย่างง่าย:
+
+```text
+feature เปลี่ยนจาก 100°E → 105°E
+ที่ latitude 15°N
+ใช้เวลา 24 ชั่วโมง
+
+distance ≈ 111.32 × cos(15°) × 5
+≈ 538 km
+
+apparent speed ≈ 538 / 24
+≈ 22.4 km/h
+```
+
+> เรียกว่า apparent propagation เพราะ Hovmöller pattern ไม่จำเป็นต้องเป็นวัตถุเดียวที่เคลื่อนจริง
+
+## Code
+
+```python
+weights = np.cos(np.deg2rad(latitude))
+field.weighted(weights).mean("latitude")
+```
 
 ---
 
-## Notebook 07 — Climatology & Seasonal Circulation
+# 14. Notebook 07 — Climatology & Seasonal Circulation
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/07_Climatology_and_Seasonal_Circulation.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เรียนรู้การสร้าง climatology จาก monthly-mean archive
+สร้าง climatology จาก monthly means หลายปี
 
-### January climatology
+## Monthly mean vs Climatology
 
-$$
+```text
+January 2011 monthly mean
+= ค่าเฉลี่ยของ January 2011
+
+January climatology
+= ค่าเฉลี่ย January ของหลายปี
+```
+
+## January climatology
+
+```math
 \overline{X}_{Jan}
 =
 \frac{1}{N_y}
-\sum_{y=1981}^{2020}
-X_{y,Jan}
-$$
+\sum_{y=1981}^{2020}X_{y,Jan}
+```
 
-### July climatology
+อ่านแบบง่าย:
 
-$$
-\overline{X}_{Jul}
-=
-\frac{1}{N_y}
-\sum_{y=1981}^{2020}
-X_{y,Jul}
-$$
+```text
+เอา January ของทุกปี 1981–2020
+มาบวกกัน
+แล้วหารด้วยจำนวนปี
+```
 
-### Seasonal difference
+ถ้ามี 40 ปี:
 
-$$
+```text
+N_y = 40
+```
+
+## ตัวอย่างง่าย
+
+สมมติ January temperature 3 ปี:
+
+```text
+Year 1 = 20 °C
+Year 2 = 22 °C
+Year 3 = 21 °C
+```
+
+Climatological mean:
+
+```text
+(20 + 22 + 21) / 3
+= 21 °C
+```
+
+## July − January seasonal difference
+
+```math
 \Delta X_{Jul-Jan}
 =
 \overline{X}_{Jul}
 -
 \overline{X}_{Jan}
-$$
+```
 
-### สิ่งที่นิสิตจะวิเคราะห์
-
-- January circulation
-- July circulation
-- temperature difference
-- RH difference
-- wind-vector difference
-- relative-vorticity difference
-- interannual variability
-
-### ข้อควรจำ
+ตัวอย่าง:
 
 ```text
-monthly mean ≠ climatology
-July − January ≠ anomaly
+July climatology = 24 °C
+January climatology = 20 °C
+
+July − January
+= 24 − 20
+= +4 °C
+```
+
+หมายความว่า July climatological value สูงกว่า January 4 °C
+
+> นี่คือ seasonal difference ไม่ใช่ anomaly
+
+## Code สำคัญ
+
+### เลือกเดือนด้วย datetime coordinate
+
+```python
+jan = ds.sel(
+    time=(ds["time"].dt.month == 1)
+)
+```
+
+### average ข้าม time
+
+```python
+JAN_CLIM = jan.mean(dim="time")
+```
+
+## Interannual variability
+
+นิสิตจะเห็นว่าแม้ climatology เป็นค่าเฉลี่ย แต่แต่ละปียังแตกต่างกัน
+
+```text
+climatology ≠ ทุกปีเหมือนกัน
 interannual variability ≠ trend
 ```
 
 ---
 
-## Notebook 08 — Anomaly Concepts & Baseline Matching
+# 15. Notebook 08 — Anomaly Concepts & Baseline Matching
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/08_Anomaly_Concepts_and_Baseline_Matching.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-เรียนรู้ว่า anomaly ที่ถูกต้องต้องเริ่มจาก baseline ที่ match กัน
+เรียนรู้ anomaly และตรวจว่า baseline match ก่อนลบ
 
-### Absolute anomaly
+## 15.1 Absolute anomaly
 
-$$
+```math
 X'
 =
-X
--
-\overline{X}_{clim}
-$$
+X-\overline{X}_{clim}
+```
 
-### Standardized anomaly
+อ่านแบบง่าย:
 
-$$
+```text
+Anomaly
+= Target value − Climatological mean
+```
+
+ตัวอย่าง:
+
+```text
+July 2011 temperature = 25 °C
+July climatology      = 23 °C
+
+Anomaly
+= 25 − 23
+= +2 °C
+```
+
+แปลว่า July 2011 สูงกว่า climatological July 2 °C
+
+## 15.2 Standardized anomaly
+
+```math
 Z
 =
 \frac{X-\mu}{\sigma}
-$$
+```
 
-### Wind-vector anomaly
+อ่านแบบง่าย:
 
-$$
+```text
+Standardized anomaly
+= anomaly / historical standard deviation
+```
+
+ตัวอย่าง:
+
+```text
+Target = 25 °C
+Climatological mean = 23 °C
+Standard deviation = 1 °C
+
+Z = (25 − 23) / 1
+  = +2
+```
+
+แปลว่า target สูงกว่าค่าเฉลี่ยประมาณ 2 standard deviations
+
+> Z = 2 ไม่ได้แปลว่า “มีนัยสำคัญทางสถิติ” โดยอัตโนมัติ
+
+## 15.3 Wind-component anomaly
+
+```math
 u'
 =
 u-\overline{u}
-$$
+```
 
-$$
+```math
 v'
 =
 v-\overline{v}
-$$
+```
 
-$$
+Vector-anomaly magnitude:
+
+```math
 |\vec{V}'|
 =
 \sqrt{u'^2+v'^2}
-$$
-
-### Baseline matching checklist
-
-ก่อน subtraction ต้องตรวจ:
-
-```text
-Variable
-+ Calendar month
-+ Pressure level
-+ Grid
-+ Units
-+ Temporal semantics
 ```
 
-Notebook ใช้ January 2011 และ July 2011 เป็นตัวอย่าง เพราะมี matching climatology
+ตัวอย่าง:
 
-### ข้อควรจำ
+```text
+u' = 3 m/s
+v' = 4 m/s
+
+|V'| = √(3² + 4²)
+     = 5 m/s
+```
+
+## Baseline matching
+
+ก่อน subtraction ต้องถาม:
+
+```text
+Variable ตรงกันหรือไม่?
+Month ตรงกันหรือไม่?
+Pressure level ตรงกันหรือไม่?
+Grid ตรงกันหรือไม่?
+Units ตรงกันหรือไม่?
+Temporal meaning ตรงกันหรือไม่?
+```
+
+ตัวอย่างที่ถูก:
+
+```text
+July 2011 monthly-mean T850
+−
+July 1981–2020 climatological T850
+```
+
+ตัวอย่างที่ไม่ถูก:
+
+```text
+2 October 2011 00-UTC snapshot
+−
+January climatology
+```
+
+## Code
+
+### สร้าง climatology
+
+```python
+JUL_MEAN = jul_archive.mean(dim="time")
+```
+
+### anomaly
+
+```python
+JUL_ANOM = JUL_2011 - JUL_MEAN
+```
+
+### standardized anomaly
+
+```python
+JUL_T_Z = JUL_ANOM["t"] / JUL_STD["t"]
+```
+
+### Zero-centered color scale
+
+```python
+TwoSlopeNorm(
+    vmin=-absmax,
+    vcenter=0,
+    vmax=absmax,
+)
+```
+
+ทำให้
+
+```text
+0 anomaly
+```
+
+อยู่ตรงกลาง color scale
+
+## สิ่งที่ต้องจำ
 
 ```text
 anomaly ≠ trend
+anomaly ≠ extreme automatically
 standardized anomaly ≠ statistical significance
-large anomaly ≠ extreme automatically
 ```
 
 และ
 
 ```text
-No October climatology
-→ Do not compute October 2011 climatological anomaly
+ไม่มี October climatology
+→ ไม่คำนวณ October 2011 climatological anomaly
 ```
 
 ---
 
-## Notebook 09 — Integrated Noul 2011 Case Study
+# 16. Notebook 09 — Integrated Noul 2011 Case Study
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nattaponm/Teaching_ERA5_Reanalysis_GIS/blob/main/09_Integrated_Noul_2011_Case_Study.ipynb)
 
-### วัตถุประสงค์
+## วัตถุประสงค์
 
-นำแนวคิดจาก Notebook 00–08 มาสังเคราะห์เป็น integrated atmospheric case study
+รวมแนวคิดทั้งหมดเข้าสู่ mini atmospheric case study
 
-### Framework
+## Integrated framework
 
 ```text
 850 hPa
@@ -795,97 +1230,298 @@ Hovmöller + regional time series
 Integrated interpretation
 ```
 
-นิสิตจะวิเคราะห์:
+## Code ทำอะไร
 
-- lower-tropospheric evolution
-- mid-tropospheric rotational structure
-- upper-level divergence
-- vertical synthesis
-- event-window Hovmöller
-- Thailand-area diagnostics
-- limitations of the available datasets
+### 1. Loop ข้าม 4 event snapshots
 
-### Scientific writing framework
+```python
+for time_value in event_times:
+    ...
+```
+
+ใช้สร้าง maps วันที่ 2, 3, 4 และ 5 October 2011 เวลา 00 UTC
+
+### 2. 850 hPa
+
+```python
+r + z + u + v
+```
+
+ใช้ดู:
+
+```text
+moisture
+lower-level circulation
+geopotential structure
+```
+
+### 3. 500 hPa
+
+```python
+vo + z + u + v
+```
+
+ใช้ดู mid-tropospheric rotational structure
+
+### 4. 200 hPa
+
+```python
+d + u + v
+```
+
+ใช้ดู upper-level divergence และ flow
+
+### 5. Hovmöller
+
+ใช้ข้อมูล 6-hourly `u850` เพื่อเพิ่ม temporal context ที่ละเอียดกว่า EVENT dataset
+
+### 6. Regional diagnostics
+
+คำนวณค่าเฉลี่ยเหนือ Thailand box สำหรับ:
+
+```text
+T850
+RH850
+wind850
+ζ500
+D200
+```
+
+## วิธีเขียนผล
+
+ใช้ framework:
 
 ```text
 Observation
-        ↓
-Physical interpretation
-        ↓
-Limitation
+→ Physical interpretation
+→ Limitation
 ```
 
-### ข้อควรจำ
+ตัวอย่าง:
 
 ```text
-EVENT = four 00-UTC snapshots
-≠ daily means
+Observation:
+RH850 is relatively high over ...
 
-u850 ≠ total wind speed
+Physical interpretation:
+This indicates a relatively moist lower-tropospheric environment.
 
-positive vorticity ≠ ascent directly
-
-upper-level divergence ≠ severe convection automatically
-
-regional mean ≠ replacement for maps
+Limitation:
+High RH alone does not demonstrate rainfall or deep convection.
 ```
-
-ชื่อไฟล์หรือชื่อ case study ไม่ใช่การยืนยัน storm track โดยอิสระ หากไม่มี track dataset สำหรับ verification
 
 ---
 
-# 7. Library ที่ใช้ในหลักสูตร
+# 17. สรุปสมการที่นิสิตควรรู้
 
-| Library / Platform | ใช้ทำอะไร | Documentation |
-|---|---|---|
-| Google Colab | Cloud notebook environment | [Google Colab](https://colab.research.google.com/) |
-| Python | ภาษาหลักสำหรับการวิเคราะห์ | [Python](https://www.python.org/) |
-| Xarray | วิเคราะห์ multidimensional labeled arrays / NetCDF | [Xarray Documentation](https://docs.xarray.dev/) |
-| netCDF4 | อ่าน/เขียน NetCDF | [netCDF4-python](https://unidata.github.io/netcdf4-python/) |
-| h5netcdf | NetCDF4/HDF5 backend | [h5netcdf](https://h5netcdf.org/) |
-| Dask | lazy / chunked array computation | [Dask](https://docs.dask.org/) |
-| NumPy | numerical array computation | [NumPy](https://numpy.org/doc/) |
-| Pandas | ตาราง, time index และ CSV | [Pandas](https://pandas.pydata.org/docs/) |
-| Matplotlib | visualization | [Matplotlib](https://matplotlib.org/stable/) |
-| Cartopy | geographic maps and projections | [Cartopy](https://cartopy.readthedocs.io/) |
+## Temperature conversion
 
----
-
-# 8. แนวทางการอ่าน Figure
-
-Figures ใน Notebook ใช้ข้อความภาษาอังกฤษเพื่อให้เหมาะกับ scientific visualization และหลีกเลี่ยงปัญหา font compatibility
-
-แนวทางการอ่าน figure:
-
-```text
-1. อ่าน variable
-2. อ่าน pressure level
-3. อ่าน date/time
-4. อ่าน units
-5. ดู spatial pattern
-6. ดู vector/contour relationship
-7. เปรียบเทียบกับ pressure level หรือเวลาอื่น
-8. สรุปเฉพาะสิ่งที่ข้อมูลสนับสนุน
+```math
+T_{^\circ C}=T_K-273.15
 ```
 
-โดยทั่วไป figures ถูกออกแบบให้ export ที่ประมาณ 300 dpi เพื่อใช้ฝึก workflow ที่ใกล้เคียงงานวิจัย
+```text
+300 K → 26.85 °C
+```
+
+## Geopotential height
+
+```math
+Z=\frac{\Phi}{g_0}
+```
+
+## Wind speed
+
+```math
+V=\sqrt{u^2+v^2}
+```
+
+## Relative vorticity
+
+```math
+\zeta
+=
+\frac{\partial v}{\partial x}
+-
+\frac{\partial u}{\partial y}
+```
+
+## Horizontal divergence
+
+```math
+D
+=
+\frac{\partial u}{\partial x}
++
+\frac{\partial v}{\partial y}
+```
+
+## Latitude weighting
+
+```math
+w(\phi)=\cos\phi
+```
+
+## Climatological mean
+
+```math
+\overline{X}
+=
+\frac{1}{N}
+\sum_{i=1}^{N}X_i
+```
+
+## Anomaly
+
+```math
+X'=X-\overline{X}_{clim}
+```
+
+## Standardized anomaly
+
+```math
+Z=\frac{X-\mu}{\sigma}
+```
+
+## Apparent propagation speed
+
+```math
+c\approx\frac{\Delta x}{\Delta t}
+```
 
 ---
 
-# 9. หลักการสำคัญที่ควรจำตลอดรายวิชา
+# 18. วิธีคิดเลขสำหรับนิสิตที่ยังไม่ถนัดคณิตศาสตร์
+
+หลักสูตรนี้ไม่ได้ต้องการให้ท่องสมการ แต่ต้องการให้เข้าใจ “สิ่งที่สมการทำ”
+
+| สมการ | อ่านแบบง่าย |
+|---|---|
+| `T_C = T_K − 273.15` | เปลี่ยน Kelvin เป็น Celsius |
+| `V = √(u²+v²)` | รวมลมสองแกนให้เป็นความเร็วลม |
+| `Z = Φ/g` | เปลี่ยน geopotential เป็น height |
+| `mean = sum/N` | บวกทุกค่าแล้วหารจำนวนข้อมูล |
+| `anomaly = target − mean` | เปรียบเทียบปีที่สนใจกับค่าปกติ |
+| `z-score = anomaly/SD` | ดูว่า anomaly ใหญ่เมื่อเทียบ variability แค่ไหน |
+| `speed = distance/time` | ประมาณความเร็วการเคลื่อน |
+
+เมื่อเจอสมการ ให้ถาม 3 ข้อ:
 
 ```text
-Reanalysis ≠ observation
+1. Input คืออะไร?
+2. คำนวณอะไร?
+3. Output มีหน่วยอะไร?
+```
+
+---
+
+# 19. วิธีอ่าน Code โดยไม่ต้องเก่ง Python มาก
+
+ให้แบ่ง code เป็น 6 กลุ่ม
+
+## 1. Import
+
+```python
+import xarray as xr
+import numpy as np
+```
+
+แปลว่าเรียก library มาใช้
+
+## 2. Read
+
+```python
+ds = xr.open_dataset(...)
+```
+
+แปลว่าเปิดข้อมูล
+
+## 3. Select
+
+```python
+.sel(...)
+.isel(...)
+```
+
+แปลว่าเลือกเวลา ระดับ หรือพื้นที่
+
+## 4. Calculate
+
+```python
+np.hypot(...)
+.mean(...)
+.std(...)
+.weighted(...)
+```
+
+แปลว่าคำนวณค่าทางสถิติหรือฟิสิกส์
+
+## 5. Plot
+
+```python
+pcolormesh(...)
+contour(...)
+quiver(...)
+```
+
+แปลว่าสร้าง figure
+
+## 6. Export
+
+```python
+to_csv(...)
+to_netcdf(...)
+savefig(...)
+```
+
+แปลว่าบันทึกผล
+
+ดังนั้น flow ของ code ส่วนใหญ่คือ:
+
+```text
+READ
+→ SELECT
+→ CALCULATE
+→ PLOT
+→ INTERPRET
+→ EXPORT
+```
+
+---
+
+# 20. วิธีอ่าน Figure
+
+ทุกครั้งให้ดูตามลำดับ:
+
+```text
+1. Variable อะไร?
+2. Pressure level เท่าไร?
+3. วันและเวลาอะไร?
+4. Units คืออะไร?
+5. สีหมายถึงอะไร?
+6. Contour หมายถึงอะไร?
+7. Vector หมายถึงอะไร?
+8. Pattern อยู่ตรงไหน?
+9. เปลี่ยนจากวันอื่นอย่างไร?
+10. สรุปอะไรได้ และอะไรยังสรุปไม่ได้?
+```
+
+---
+
+# 21. Scientific Cautions ที่ต้องจำ
+
+```text
+Reanalysis ≠ direct observation
 Reanalysis ≠ forecast
 
-data CRS ≠ map projection
+grid spacing ≠ effective physical resolution
 
-grid spacing ≠ physical resolution
+data CRS ≠ display projection
 
-u/v components ≠ wind speed
+u/v ≠ wind speed
 
 ERA5 z ≠ geopotential height
-until divided by g₀
+ก่อนหารด้วย g₀
 
 positive vorticity ≠ ascent directly
 
@@ -895,103 +1531,42 @@ high RH ≠ rainfall automatically
 
 Hovmöller ≠ full spatial field
 
-climatology ≠ trend
+monthly mean ≠ climatology
 
 seasonal difference ≠ anomaly
 
-anomaly ≠ statistical significance
+anomaly ≠ trend
+
+standardized anomaly ≠ statistical significance
 
 00-UTC snapshot ≠ daily mean
 ```
 
 ---
 
-# 10. Suggested Learning Workflow
+# 22. Suggested Learning Workflow
 
-สำหรับแต่ละ Notebook แนะนำให้นิสิตทำตามลำดับ:
+ก่อนกด Run ให้ทำตามนี้:
 
 ```text
-1. อ่าน Learning Objectives
-2. อ่าน Theory / Concept
-3. อ่านสมการและความหมายของตัวแปร
-4. ตรวจ input data
-5. Run code ทีละ cell
-6. อ่าน figure ก่อนอ่านคำอธิบาย
-7. เขียน Observation ของตนเอง
-8. เขียน Physical interpretation
-9. ระบุ Limitation
-10. ทำ Exercise
+1. อ่านวัตถุประสงค์ Notebook
+2. อ่าน Theory
+3. อ่านสมการแบบข้อความง่าย
+4. ดู input file
+5. Run ทีละ cell
+6. อ่าน output
+7. อ่าน figure
+8. เขียน Observation
+9. เขียน Physical interpretation
+10. เขียน Limitation
+11. ทำ Exercise
 ```
 
-ไม่แนะนำให้เลือก `Runtime → Run all` ตั้งแต่ครั้งแรกโดยไม่อ่าน Markdown เพราะเป้าหมายของ repository นี้คือการเข้าใจ **เหตุผลของการวิเคราะห์** ไม่ใช่เพียงสร้างรูปให้สำเร็จ
+ไม่แนะนำให้ `Run all` ครั้งแรกโดยไม่อ่าน Markdown
 
 ---
 
-# 11. จากการเรียนสู่ Mini Research Project
-
-หลังจบ Notebook 09 นิสิตควรสามารถตั้ง workflow ของตนเองได้
-
-```text
-Research question
-        ↓
-Select ERA5 variables
-        ↓
-Choose pressure level / time period
-        ↓
-Audit metadata
-        ↓
-Spatial subset
-        ↓
-Build maps / time series / Hovmöller
-        ↓
-Compare atmospheric levels
-        ↓
-Interpret physical mechanisms
-        ↓
-State limitations
-        ↓
-Export reproducible figures and tables
-```
-
-ตัวอย่างคำถามที่สามารถพัฒนาต่อ:
-
-- circulation ก่อนและหลัง heavy-rain event แตกต่างกันอย่างไร?
-- low-level moisture transport เปลี่ยนตามฤดูกาลอย่างไร?
-- 500-hPa vorticity pattern เชื่อมกับ synoptic evolution อย่างไร?
-- upper-level wind และ divergence เปลี่ยนอย่างไรระหว่างเหตุการณ์?
-- monsoon circulation ใน January และ July แตกต่างกันอย่างไร?
-- atmospheric anomaly ของปีหนึ่งแตกต่างจาก climatological baseline มากเพียงใด?
-
----
-
-# 12. Data and Scientific Caveats
-
-### 12.1 0.5° teaching grid
-
-Teaching datasets ถูกลดขนาดเพื่อให้ใช้งานง่ายใน Colab
-
-```text
-0.5° grid spacing
-≠ claim of 0.5° effective atmospheric resolution
-```
-
-### 12.2 850 hPa over high terrain
-
-850-hPa pressure surface อาจอยู่ต่ำกว่าพื้นดินเหนือภูมิประเทศสูง เช่น Tibetan Plateau และ Himalayas
-
-prepared dataset ไม่มี surface pressure สำหรับทำ robust below-ground mask
-
-### 12.3 EVENT temporal sampling
-
-EVENT dataset มีเฉพาะ 00 UTC ของ 2–5 October 2011 จึงไม่สามารถใช้แทน full diurnal evolution ได้
-
-### 12.4 October climatology
-
-Monthly baseline มีเฉพาะ January และ July จึงไม่มี scientific basis สำหรับสร้าง October 2011 monthly anomaly จาก dataset นี้
-
----
-
-# 13. Repository Structure
+# 23. Repository Structure
 
 ```text
 Teaching_ERA5_Reanalysis_GIS/
@@ -1017,33 +1592,40 @@ Teaching_ERA5_Reanalysis_GIS/
 
 ---
 
-# 14. Recommended Citation for ERA5
+# 24. Learning Outcome หลังจบ Repository
 
-Hersbach, H., Bell, B., Berrisford, P., et al. (2020). The ERA5 global reanalysis. *Quarterly Journal of the Royal Meteorological Society, 146*(730), 1999–2049. https://doi.org/10.1002/qj.3803
-
----
-
-# 15. Final Learning Message
-
-เมื่อเรียนครบ repository นี้ สิ่งที่สำคัญที่สุดไม่ใช่การจำ syntax ของ Python แต่คือการตอบคำถามต่อไปนี้ให้ได้:
+เมื่อนิสิตจบ Notebook 00–09 ควรสามารถ:
 
 ```text
-ข้อมูลนี้คืออะไร?
-มาจากไหน?
-มีข้อจำกัดอะไร?
-ตัวแปรนี้มีความหมายทางฟิสิกส์อย่างไร?
-เหตุใดจึงเลือก pressure level นี้?
-เหตุใดจึงเลือกแผนที่หรือ Hovmöller?
-สิ่งที่เห็นใน figure สนับสนุนข้อสรุปอะไร?
-และมีอะไรที่ยังสรุปไม่ได้?
+อ่าน NetCDF metadata
+↓
+เลือก atmospheric variables
+↓
+เลือก pressure level
+↓
+subset พื้นที่
+↓
+สร้าง weather map
+↓
+คำนวณ wind / height / climatology / anomaly
+↓
+สร้าง Hovmöller
+↓
+เปรียบเทียบหลาย atmospheric levels
+↓
+ตีความผลเชิงกายภาพ
+↓
+ระบุข้อจำกัด
+↓
+ส่งออก figure และ table แบบ reproducible
 ```
 
-> **Good atmospheric analysis = correct data handling + physical understanding + spatial thinking + cautious interpretation + reproducibility**
+เป้าหมายสุดท้ายคือให้นิสิตตอบคำถามนี้ได้:
+
+> **ข้อมูลบอกอะไร และข้อมูลยังไม่สามารถบอกอะไร?**
 
 ---
 
-## Instructor / Repository
+## Repository
 
-**Teaching ERA5 Reanalysis & GIS**
-
-GitHub: [https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS](https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS)
+[Teaching ERA5 Reanalysis & GIS](https://github.com/nattaponm/Teaching_ERA5_Reanalysis_GIS)
